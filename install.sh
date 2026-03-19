@@ -26,7 +26,7 @@ if [ "$NODE_VERSION" -lt 18 ]; then
 fi
 
 # Install directory
-INSTALL_DIR="${1:-$HOME/mercury-ach}"
+INSTALL_DIR="${1:-$(pwd)/mercury-ach}"
 
 if [ -d "$INSTALL_DIR" ]; then
   printf "${YELLOW}Directory $INSTALL_DIR already exists.${NC}\n"
