@@ -15,13 +15,14 @@ const TOKEN = process.env.MERCURY_API;
 
 // Auto-shutdown when browser disconnects
 let clients = 0;
+let restarting = false;
 app.get('/api/keepalive', (req, res) => {
   res.set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
   res.flushHeaders();
   clients++;
   req.on('close', () => {
     clients--;
-    if (clients <= 0) {
+    if (clients <= 0 && !restarting) {
       console.log('Browser disconnected — shutting down.');
       process.exit(0);
     }
@@ -94,13 +95,16 @@ if (!TOKEN) {
   app.post('/api/setup/restart', (req, res) => {
     res.json({ ok: true });
     setTimeout(() => {
+      restarting = true;
       const token = require('dotenv').parse(fs.readFileSync(path.join(__dirname, '.env'), 'utf8')).MERCURY_API;
-      const child = require('child_process').spawn(process.argv[0], process.argv.slice(1), {
-        stdio: 'inherit',
-        env: { ...process.env, MERCURY_API: token },
+      server.closeAllConnections();
+      server.close(() => {
+        const child = require('child_process').spawn(process.argv[0], process.argv.slice(1), {
+          stdio: 'inherit',
+          env: { ...process.env, MERCURY_API: token },
+        });
+        child.on('exit', (code) => process.exit(code ?? 0));
       });
-      child.on('exit', (code) => process.exit(code ?? 0));
-      server.close();
     }, 500);
   });
 
