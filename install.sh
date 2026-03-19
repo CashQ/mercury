@@ -74,4 +74,4 @@ open_url() {
 # Auto-start server
 printf "${GREEN}Starting Mercury ACH at http://localhost:${PORT}...${NC}\n"
 printf "\n"
-node server.js
+exec node server.js
