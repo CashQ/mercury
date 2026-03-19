@@ -1,0 +1,14 @@
+{
+  "name": "mercury-ach-sender",
+  "version": "1.0.0",
+  "description": "Test app for sending ACH payments via Mercury API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "uuid": "^11.1.0"
+  }
+}
