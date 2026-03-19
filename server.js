@@ -94,14 +94,13 @@ if (!TOKEN) {
   app.post('/api/setup/restart', (req, res) => {
     res.json({ ok: true });
     setTimeout(() => {
-      const { spawn } = require('child_process');
-      const child = spawn(process.argv[0], [__filename], {
-        detached: true,
+      const token = require('dotenv').parse(fs.readFileSync(path.join(__dirname, '.env'), 'utf8')).MERCURY_API;
+      const child = require('child_process').spawn(process.argv[0], process.argv.slice(1), {
         stdio: 'inherit',
-        env: { ...process.env, MERCURY_API: require('dotenv').parse(fs.readFileSync(path.join(__dirname, '.env'), 'utf8')).MERCURY_API },
+        env: { ...process.env, MERCURY_API: token },
       });
-      child.unref();
-      process.exit(0);
+      child.on('exit', (code) => process.exit(code ?? 0));
+      server.close();
     }, 500);
   });
 
@@ -239,7 +238,7 @@ async function restartServer() {
   });
 
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT} (setup mode)`);
   });
   return;
