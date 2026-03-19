@@ -1,21 +1,34 @@
 let recipients = [];
+let accounts = [];
 let selectedRecipient = null;
 let mode = 'existing';
 
 // --- Init ---
 document.addEventListener('DOMContentLoaded', () => {
-  loadAccount();
+  loadAccounts();
   loadRecipients();
 });
 
-async function loadAccount() {
+async function loadAccounts() {
   try {
     const res = await fetch('/api/accounts');
     const data = await res.json();
     const badge = document.getElementById('account-badge');
-    if (data.accounts && data.accounts.length > 0) {
-      const acct = data.accounts.find(a => a.status === 'active') || data.accounts[0];
-      badge.textContent = acct.nickname || acct.name;
+    accounts = (data.accounts || []).filter(a => a.status === 'active');
+
+    if (accounts.length > 0) {
+      badge.textContent = accounts[0].nickname || accounts[0].name;
+      // Populate account dropdown on step 2
+      const select = document.getElementById('p-account');
+      const wrap = document.getElementById('account-select-wrap');
+      if (select) {
+        select.innerHTML = accounts.map(a => {
+          const label = `${a.nickname || a.name} — $${a.availableBalance.toFixed(2)}`;
+          return `<option value="${a.id}">${escapeHtml(label)}</option>`;
+        }).join('');
+        // Only show dropdown when multiple accounts
+        if (accounts.length > 1 && wrap) wrap.classList.remove('hidden');
+      }
     } else {
       badge.textContent = 'No account';
     }
@@ -205,6 +218,7 @@ async function sendPayment() {
   const memo = document.getElementById('p-memo').value.trim();
   const category = document.getElementById('p-category').value;
   const categoryInfo = document.getElementById('p-category-info').value.trim();
+  const accountId = document.getElementById('p-account').value;
 
   if (!amount || amount < 0.01) {
     showAlert('alert-area-2', 'Enter a valid amount (min $0.01).');
@@ -213,6 +227,7 @@ async function sendPayment() {
 
   const body = {
     recipientId: selectedRecipient.id,
+    accountId,
     amount,
     memo: memo || undefined,
   };

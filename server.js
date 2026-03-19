@@ -60,10 +60,14 @@ if (!TOKEN) {
       const envPath = path.join(__dirname, '.env');
       fs.writeFileSync(envPath, `MERCURY_API=${token.trim()}\n`);
 
-      const acct = data.accounts?.find(a => a.status === 'active');
+      const activeAccounts = (data.accounts || []).filter(a => a.status === 'active');
       return res.json({
         ok: true,
-        account: acct ? `${acct.name} ($${acct.availableBalance})` : 'Connected',
+        accounts: activeAccounts.map(a => ({
+          name: a.nickname || a.name,
+          balance: a.availableBalance,
+          kind: a.kind,
+        })),
         message: 'API key saved. Restarting server...',
       });
     } catch (err) {
@@ -74,7 +78,16 @@ if (!TOKEN) {
   // Restart server after key is saved
   app.post('/api/setup/restart', (req, res) => {
     res.json({ ok: true });
-    setTimeout(() => process.exit(0), 500);
+    setTimeout(() => {
+      const { spawn } = require('child_process');
+      const child = spawn(process.argv[0], [__filename], {
+        detached: true,
+        stdio: 'inherit',
+        env: { ...process.env, MERCURY_API: fs.readFileSync(path.join(__dirname, '.env'), 'utf8').split('=').slice(1).join('=').trim() },
+      });
+      child.unref();
+      process.exit(0);
+    }, 500);
   });
 
   // Setup page
@@ -161,7 +174,10 @@ async function validateKey() {
     }
 
     // Success
-    alert.innerHTML = '<div class="alert alert-success">Connected to ' + data.account + '</div>';
+    var acctList = data.accounts.map(function(a) {
+      return '<div style="padding:4px 0">' + a.name + ' <span style="float:right">$' + a.balance.toFixed(2) + '</span></div>';
+    }).join('');
+    alert.innerHTML = '<div class="alert alert-success"><strong>' + data.accounts.length + ' account' + (data.accounts.length > 1 ? 's' : '') + ' found:</strong>' + acctList + '</div>';
     document.getElementById('icon').className = 'icon icon-ok';
     document.getElementById('icon').textContent = '✓';
     document.getElementById('title').textContent = 'API Key Saved';
@@ -263,15 +279,9 @@ app.post('/api/recipients', async (req, res) => {
 // Send ACH payment
 app.post('/api/send', async (req, res) => {
   try {
-    // Get first active account
-    const acctResp = await fetch(`${MERCURY_BASE}/accounts`, { headers });
-    const acctData = await acctResp.json();
-    if (!acctResp.ok) return res.status(acctResp.status).json(acctData);
+    const { recipientId, accountId, amount, memo, category, categoryInfo } = req.body;
 
-    const account = acctData.accounts.find(a => a.status === 'active');
-    if (!account) return res.status(400).json({ error: 'No active Mercury account found' });
-
-    const { recipientId, amount, memo, category, categoryInfo } = req.body;
+    if (!accountId) return res.status(400).json({ error: 'No account selected' });
 
     const payload = {
       recipientId,
@@ -284,7 +294,7 @@ app.post('/api/send', async (req, res) => {
       payload.purpose = { category };
     }
 
-    const resp = await fetch(`${MERCURY_BASE}/account/${account.id}/transactions`, {
+    const resp = await fetch(`${MERCURY_BASE}/account/${accountId}/transactions`, {
       method: 'POST',
       headers,
       body: JSON.stringify(payload),
