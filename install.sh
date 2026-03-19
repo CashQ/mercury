@@ -25,8 +25,8 @@ if [ "$NODE_VERSION" -lt 18 ]; then
   exit 1
 fi
 
-# Install directory
-INSTALL_DIR="${1:-$(pwd)/mercury-ach}"
+# Install to ./mercury-ach in current directory
+INSTALL_DIR="$(pwd)/mercury-ach"
 
 if [ -d "$INSTALL_DIR" ]; then
   printf "${YELLOW}Directory $INSTALL_DIR already exists.${NC}\n"
@@ -50,16 +50,6 @@ cd "$INSTALL_DIR"
 printf "${GREEN}Installing dependencies...${NC}\n"
 npm install --silent 2>/dev/null
 
-# Install mercury-ach command
-printf "${GREEN}Installing mercury-ach command...${NC}\n"
-if [ -w /usr/local/bin ]; then
-  ln -sf "$INSTALL_DIR/bin/mercury-ach" /usr/local/bin/mercury-ach
-elif command -v sudo >/dev/null 2>&1; then
-  sudo ln -sf "$INSTALL_DIR/bin/mercury-ach" /usr/local/bin/mercury-ach
-else
-  printf "${YELLOW}Could not install to /usr/local/bin. Add $INSTALL_DIR/bin to your PATH manually.${NC}\n"
-fi
-
 printf "\n"
 printf "${GREEN}═══════════════════════════════════════${NC}\n"
 printf "${GREEN}  Installation complete!${NC}\n"
@@ -67,17 +57,21 @@ printf "${GREEN}═════════════════════�
 printf "\n"
 printf "  Installed to: ${CYAN}$INSTALL_DIR${NC}\n"
 printf "\n"
-printf "  To start:  ${CYAN}mercury-ach${NC}\n"
-printf "  Then open: ${CYAN}http://localhost:3000${NC}\n"
-printf "\n"
-printf "  The app will guide you through API token setup.\n"
+printf "  To start later:  ${CYAN}cd $INSTALL_DIR && node server.js${NC}\n"
 printf "\n"
 
-# Ask to start now
-printf "Start now? (Y/n) "
-read -n 1 -r REPLY </dev/tty 2>/dev/null || REPLY="n"
+# Open browser after short delay (before server blocks)
+PORT="${PORT:-3000}"
+open_url() {
+  if command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "$1"
+  elif command -v open >/dev/null 2>&1; then
+    open "$1"
+  fi
+}
+(sleep 2 && open_url "http://localhost:$PORT") >/dev/null 2>&1 &
+
+# Auto-start server
+printf "${GREEN}Starting Mercury ACH at http://localhost:${PORT}...${NC}\n"
 printf "\n"
-if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-  printf "\n"
-  mercury-ach
-fi
+node server.js
