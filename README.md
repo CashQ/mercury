@@ -1,14 +1,12 @@
 # Mercury ACH Sender
 
-Simple web app for sending ACH payments via the [Mercury Banking API](https://docs.mercury.com/docs/getting-started).
-
-## Quick Install
-
 ```bash
 curl -fsSL https://raw.githubusercontent.com/CashQ/mercury/main/install.sh | bash
 ```
 
-Requires Node.js 18+ and git. Clones the repo, installs dependencies, and starts the server. The app guides you through API token setup in the browser.
+Installs, starts the server, and opens the browser. Requires Node.js 18+ and git.
+
+Simple web app for sending ACH payments via the [Mercury Banking API](https://docs.mercury.com/docs/getting-started). The app guides you through API token setup in the browser.
 
 ## Features
 
