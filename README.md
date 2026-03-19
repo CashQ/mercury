@@ -4,21 +4,36 @@ Simple web app for sending ACH payments via the [Mercury Banking API](https://do
 
 ## Features
 
-- View existing Mercury recipients
-- Create new recipients with ACH bank details
-- Send ACH payments with category and memo
-- Confirmation with transaction status and Mercury dashboard link
+- **Self-service setup** — enter API token in the browser, validates and saves automatically
+- **Existing recipients** — browse and select from your Mercury recipient list
+- **New recipients** — create with full ACH bank details (routing, account, address)
+- **Account selection** — choose which Mercury account to send from (auto-selects if only one)
+- **Transaction categories** — defaults to Contractor, with all Mercury categories available
+- **Confirmation** — shows status, transaction ID, estimated delivery, and Mercury dashboard link
+- **Error handling** — specific messages for invalid tokens, IP whitelist issues, etc.
 
 ## Setup
 
-### 1. Get a Mercury API Token
+### 1. Install and Run
 
-1. Log in to [Mercury](https://app.mercury.com)
-2. Go to **Settings → API Tokens**
-3. Create a new token with **Read and Write** permissions
-4. Add your server's IP address to the token's whitelist (both IPv4 and IPv6 if applicable)
+```bash
+npm install
+npm start
+```
 
-### 2. Configure Environment
+### 2. Configure API Token
+
+Open [http://localhost:3000](http://localhost:3000) — if no API token is configured, the app shows an interactive setup page where you can:
+
+1. Paste your Mercury API token
+2. The app validates it against the Mercury API
+3. On success, saves to `.env` and restarts automatically
+
+To get a token: log in to [Mercury](https://app.mercury.com) → **Settings → API Tokens** → create a **Read and Write** token.
+
+> **Note:** Mercury requires IP whitelisting for Read/Write tokens. Add your server's IP address to the token's whitelist. The setup page will show your IP if it's not whitelisted.
+
+### Manual Setup (alternative)
 
 Create a `.env` file in the project root:
 
@@ -26,14 +41,7 @@ Create a `.env` file in the project root:
 MERCURY_API=secret-token:your_token_here
 ```
 
-### 3. Install and Run
-
-```bash
-npm install
-npm start
-```
-
-The app runs at [http://localhost:3000](http://localhost:3000).
+Then run `npm start`.
 
 ## Project Structure
 
@@ -43,7 +51,7 @@ The app runs at [http://localhost:3000](http://localhost:3000).
 │   ├── index.html     # Two-step wizard UI
 │   ├── style.css      # Anthropic-inspired styling
 │   └── app.js         # Frontend logic
-├── .env               # API token (not committed)
+├── .env               # API token (created by setup, not committed)
 └── package.json
 ```
 
