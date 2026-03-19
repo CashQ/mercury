@@ -1,5 +1,10 @@
 #!/bin/bash
 cd "$(dirname "${BASH_SOURCE[0]}")"
+
+if [ ! -f server.js ]; then
+  echo "Run this from your mercury-ach folder: cd mercury-ach && ./start"
+  exit 1
+fi
 PORT="${PORT:-3000}"
 
 # Open browser after server starts
