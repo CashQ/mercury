@@ -30,8 +30,9 @@ INSTALL_DIR="${1:-$(pwd)/mercury-ach}"
 
 if [ -d "$INSTALL_DIR" ]; then
   printf "${YELLOW}Directory $INSTALL_DIR already exists.${NC}\n"
-  read -p "Overwrite? (y/N) " -n 1 -r
-  echo
+  printf "Overwrite? (y/N) "
+  read -n 1 -r REPLY </dev/tty 2>/dev/null || REPLY="n"
+  printf "\n"
   if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "Aborted."
     exit 0
@@ -73,8 +74,9 @@ printf "  The app will guide you through API token setup.\n"
 printf "\n"
 
 # Ask to start now
-read -p "Start now? (Y/n) " -n 1 -r
-echo
+printf "Start now? (Y/n) "
+read -n 1 -r REPLY </dev/tty 2>/dev/null || REPLY="n"
+printf "\n"
 if [[ ! $REPLY =~ ^[Nn]$ ]]; then
   printf "\n"
   mercury-ach
