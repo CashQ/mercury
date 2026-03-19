@@ -7,6 +7,7 @@ let mode = 'existing';
 document.addEventListener('DOMContentLoaded', () => {
   loadAccounts();
   loadRecipients();
+  new EventSource('/api/keepalive');
 });
 
 async function loadAccounts() {

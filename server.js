@@ -13,6 +13,21 @@ app.use(express.json());
 const MERCURY_BASE = 'https://api.mercury.com/api/v1';
 const TOKEN = process.env.MERCURY_API;
 
+// Auto-shutdown when browser disconnects
+let clients = 0;
+app.get('/api/keepalive', (req, res) => {
+  res.set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
+  res.flushHeaders();
+  clients++;
+  req.on('close', () => {
+    clients--;
+    if (clients <= 0) {
+      console.log('Browser disconnected — shutting down.');
+      process.exit(0);
+    }
+  });
+});
+
 if (!TOKEN) {
   const fs = require('fs');
 
@@ -143,6 +158,7 @@ if (!TOKEN) {
 </div>
 
 <script>
+new EventSource('/api/keepalive');
 async function validateKey() {
   const token = document.getElementById('token').value.trim();
   const btn = document.getElementById('btn-validate');
