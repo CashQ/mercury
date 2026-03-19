@@ -8,20 +8,20 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-echo ""
-echo -e "${CYAN}═══════════════════════════════════════${NC}"
-echo -e "${CYAN}  Mercury ACH Sender — Installer${NC}"
-echo -e "${CYAN}═══════════════════════════════════════${NC}"
-echo ""
+printf "\n"
+printf "${CYAN}═══════════════════════════════════════${NC}\n"
+printf "${CYAN}  Mercury ACH Sender — Installer${NC}\n"
+printf "${CYAN}═══════════════════════════════════════${NC}\n"
+printf "\n"
 
 # Check prerequisites
-command -v node >/dev/null 2>&1 || { echo -e "${RED}Node.js is required. Install it from https://nodejs.org${NC}"; exit 1; }
-command -v npm >/dev/null 2>&1 || { echo -e "${RED}npm is required. Install Node.js from https://nodejs.org${NC}"; exit 1; }
-command -v git >/dev/null 2>&1 || { echo -e "${RED}git is required. Install it from https://git-scm.com${NC}"; exit 1; }
+command -v node >/dev/null 2>&1 || { printf "${RED}Node.js is required. Install it from https://nodejs.org${NC}\n"; exit 1; }
+command -v npm >/dev/null 2>&1 || { printf "${RED}npm is required. Install Node.js from https://nodejs.org${NC}\n"; exit 1; }
+command -v git >/dev/null 2>&1 || { printf "${RED}git is required. Install it from https://git-scm.com${NC}\n"; exit 1; }
 
 NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
 if [ "$NODE_VERSION" -lt 18 ]; then
-  echo -e "${RED}Node.js 18+ is required (found v$(node -v)). Update at https://nodejs.org${NC}"
+  printf "${RED}Node.js 18+ is required (found $(node -v)). Update at https://nodejs.org${NC}\n"
   exit 1
 fi
 
@@ -29,7 +29,7 @@ fi
 INSTALL_DIR="${1:-$HOME/mercury-ach}"
 
 if [ -d "$INSTALL_DIR" ]; then
-  echo -e "${YELLOW}Directory $INSTALL_DIR already exists.${NC}"
+  printf "${YELLOW}Directory $INSTALL_DIR already exists.${NC}\n"
   read -p "Overwrite? (y/N) " -n 1 -r
   echo
   if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -40,31 +40,42 @@ if [ -d "$INSTALL_DIR" ]; then
 fi
 
 # Clone
-echo -e "${GREEN}Cloning repository...${NC}"
+printf "${GREEN}Cloning repository...${NC}\n"
 git clone --depth 1 https://github.com/CashQ/mercury.git "$INSTALL_DIR" 2>/dev/null
+
 cd "$INSTALL_DIR"
 
 # Install dependencies
-echo -e "${GREEN}Installing dependencies...${NC}"
+printf "${GREEN}Installing dependencies...${NC}\n"
 npm install --silent 2>/dev/null
 
-echo ""
-echo -e "${GREEN}═══════════════════════════════════════${NC}"
-echo -e "${GREEN}  Installation complete!${NC}"
-echo -e "${GREEN}═══════════════════════════════════════${NC}"
-echo ""
-echo -e "  Installed to: ${CYAN}$INSTALL_DIR${NC}"
-echo ""
-echo -e "  To start:  ${CYAN}cd $INSTALL_DIR && npm start${NC}"
-echo -e "  Then open: ${CYAN}http://localhost:3000${NC}"
-echo ""
-echo -e "  The app will guide you through API token setup."
-echo ""
+# Install mercury-ach command
+printf "${GREEN}Installing mercury-ach command...${NC}\n"
+if [ -w /usr/local/bin ]; then
+  ln -sf "$INSTALL_DIR/bin/mercury-ach" /usr/local/bin/mercury-ach
+elif command -v sudo >/dev/null 2>&1; then
+  sudo ln -sf "$INSTALL_DIR/bin/mercury-ach" /usr/local/bin/mercury-ach
+else
+  printf "${YELLOW}Could not install to /usr/local/bin. Add $INSTALL_DIR/bin to your PATH manually.${NC}\n"
+fi
+
+printf "\n"
+printf "${GREEN}═══════════════════════════════════════${NC}\n"
+printf "${GREEN}  Installation complete!${NC}\n"
+printf "${GREEN}═══════════════════════════════════════${NC}\n"
+printf "\n"
+printf "  Installed to: ${CYAN}$INSTALL_DIR${NC}\n"
+printf "\n"
+printf "  To start:  ${CYAN}mercury-ach${NC}\n"
+printf "  Then open: ${CYAN}http://localhost:3000${NC}\n"
+printf "\n"
+printf "  The app will guide you through API token setup.\n"
+printf "\n"
 
 # Ask to start now
-read -p "Start the server now? (Y/n) " -n 1 -r
+read -p "Start now? (Y/n) " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-  echo ""
-  npm start
+  printf "\n"
+  mercury-ach
 fi

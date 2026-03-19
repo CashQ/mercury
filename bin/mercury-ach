@@ -1,0 +1,12 @@
+#!/bin/bash
+INSTALL_DIR="$HOME/mercury-ach"
+
+if [ ! -d "$INSTALL_DIR" ]; then
+  echo "Mercury ACH not found. Install with:"
+  echo "  curl -fsSL https://raw.githubusercontent.com/CashQ/mercury/main/install.sh | bash"
+  exit 1
+fi
+
+cd "$INSTALL_DIR"
+echo "Mercury ACH starting at http://localhost:${PORT:-3000}"
+node server.js
