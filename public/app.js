@@ -277,7 +277,7 @@ function showConfirmation(tx) {
     <div class="icon ${isSuccess ? 'success' : 'error'}">${isSuccess ? '&#10003;' : '&#10007;'}</div>
     <h3>${isSuccess ? 'Payment Initiated' : 'Payment Failed'}</h3>
     <p style="color: var(--text-secondary); font-size: 14px;">
-      ${isSuccess ? 'Your ACH transfer is being processed.' : (tx.reasonForFailure || 'Something went wrong.')}
+      ${isSuccess ? 'Your ACH transfer is being processed.' : escapeHtml(tx.reasonForFailure || 'Something went wrong.')}
     </p>
     <div class="amount">$${Math.abs(Number(tx.amount)).toFixed(2)}</div>
     <div class="details">
@@ -301,7 +301,7 @@ function showConfirmation(tx) {
       ${tx.dashboardLink ? `
       <div class="row-item">
         <span class="row-label">Dashboard</span>
-        <span><a href="${escapeHtml(tx.dashboardLink)}" target="_blank" style="color: var(--accent);">View in Mercury</a></span>
+        <span><a href="${tx.dashboardLink.startsWith('https://') ? escapeHtml(tx.dashboardLink) : '#'}" target="_blank" style="color: var(--accent);">View in Mercury</a></span>
       </div>` : ''}
     </div>
   `;

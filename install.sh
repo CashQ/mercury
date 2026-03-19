@@ -42,13 +42,13 @@ fi
 
 # Clone
 printf "${GREEN}Cloning repository...${NC}\n"
-git clone --depth 1 https://github.com/CashQ/mercury.git "$INSTALL_DIR" 2>/dev/null
+git clone --depth 1 https://github.com/CashQ/mercury.git "$INSTALL_DIR"
 
 cd "$INSTALL_DIR"
 
 # Install dependencies
 printf "${GREEN}Installing dependencies...${NC}\n"
-npm install --silent 2>/dev/null
+npm install --silent
 
 printf "\n"
 printf "${GREEN}═══════════════════════════════════════${NC}\n"

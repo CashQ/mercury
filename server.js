@@ -83,7 +83,7 @@ if (!TOKEN) {
       const child = spawn(process.argv[0], [__filename], {
         detached: true,
         stdio: 'inherit',
-        env: { ...process.env, MERCURY_API: fs.readFileSync(path.join(__dirname, '.env'), 'utf8').split('=').slice(1).join('=').trim() },
+        env: { ...process.env, MERCURY_API: require('dotenv').parse(fs.readFileSync(path.join(__dirname, '.env'), 'utf8')).MERCURY_API },
       });
       child.unref();
       process.exit(0);
@@ -167,8 +167,8 @@ async function validateKey() {
 
     if (!data.ok) {
       let msg = data.error;
-      if (data.helpUrl) msg += ' <a href="' + data.helpUrl + '" target="_blank">Documentation →</a>';
-      if (data.ip) msg += '<br><br><strong>Your IP:</strong> ' + data.ip + '<br>Copy this and add it to your token whitelist.';
+      if (data.helpUrl) msg += ' <a href="' + encodeURI(data.helpUrl) + '" target="_blank">Documentation →</a>';
+      if (data.ip) msg += '<br><br><strong>Your IP:</strong> ' + data.ip.replace(/[<>"'&]/g, '') + '<br>Copy this and add it to your token whitelist.';
       alert.innerHTML = '<div class="alert alert-error">' + msg + '</div>';
       return;
     }
@@ -263,10 +263,14 @@ app.get('/api/recipients', async (req, res) => {
 // Create a new recipient
 app.post('/api/recipients', async (req, res) => {
   try {
+    const { name, emails, electronicRoutingInfo } = req.body;
+    if (!name || !electronicRoutingInfo) {
+      return res.status(400).json({ error: 'Missing required recipient fields' });
+    }
     const resp = await fetch(`${MERCURY_BASE}/recipients`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(req.body),
+      body: JSON.stringify({ name, emails, electronicRoutingInfo }),
     });
     const data = await resp.json();
     if (!resp.ok) return res.status(resp.status).json(data);
@@ -282,10 +286,16 @@ app.post('/api/send', async (req, res) => {
     const { recipientId, accountId, amount, memo, category, categoryInfo } = req.body;
 
     if (!accountId) return res.status(400).json({ error: 'No account selected' });
+    if (!recipientId) return res.status(400).json({ error: 'No recipient selected' });
+
+    const parsedAmount = parseFloat(amount);
+    if (!Number.isFinite(parsedAmount) || parsedAmount < 0.01) {
+      return res.status(400).json({ error: 'Invalid amount. Must be at least $0.01.' });
+    }
 
     const payload = {
       recipientId,
-      amount: parseFloat(amount),
+      amount: parsedAmount,
       paymentMethod: 'ach',
       idempotencyKey: uuidv4(),
     };
