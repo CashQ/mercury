@@ -6,6 +6,12 @@ curl -fsSL https://raw.githubusercontent.com/CashQ/mercury/main/install.sh | bas
 
 Installs, starts the server, and opens the browser. Requires Node.js 18+ and git.
 
+To run again after installing:
+
+```bash
+mercury-ach/start
+```
+
 Simple web app for sending ACH payments via the [Mercury Banking API](https://docs.mercury.com/docs/getting-started). The app guides you through API token setup in the browser.
 
 ## Features
