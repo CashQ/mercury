@@ -1,6 +1,5 @@
 #!/bin/bash
-SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
-INSTALL_DIR="$(cd "$(dirname "$SCRIPT")/.." && pwd)"
+INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 if [ ! -f "$INSTALL_DIR/server.js" ]; then
   echo "Mercury ACH not found. Install with:"

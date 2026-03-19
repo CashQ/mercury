@@ -1,0 +1,16 @@
+#!/bin/bash
+cd "$(dirname "${BASH_SOURCE[0]}")"
+PORT="${PORT:-3000}"
+
+# Open browser after server starts
+open_url() {
+  if command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "$1"
+  elif command -v open >/dev/null 2>&1; then
+    open "$1"
+  fi
+}
+(sleep 2 && open_url "http://localhost:$PORT") >/dev/null 2>&1 &
+
+echo "Mercury ACH starting at http://localhost:$PORT"
+node server.js

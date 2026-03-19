@@ -57,7 +57,7 @@ printf "${GREEN}═════════════════════�
 printf "\n"
 printf "  Installed to: ${CYAN}$INSTALL_DIR${NC}\n"
 printf "\n"
-printf "  To start later:  ${CYAN}cd $INSTALL_DIR && node server.js${NC}\n"
+printf "  To start later:  ${CYAN}cd $INSTALL_DIR && ./start${NC}\n"
 printf "\n"
 
 # Open browser after short delay (before server blocks)
